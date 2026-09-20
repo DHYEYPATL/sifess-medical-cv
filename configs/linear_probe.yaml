@@ -1,0 +1,12 @@
+seed: 42
+dataset: chestmnist
+image_size: 224
+backbone: resnet50
+batch_size: 64
+epochs: 20
+lr: 0.001
+fp16: true
+num_workers: 2
+checkpoint: null            # path to SSL checkpoint.pt
+output_dir: outputs/linear_probe
+subset: null

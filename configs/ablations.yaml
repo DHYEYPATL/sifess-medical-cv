@@ -1,0 +1,18 @@
+# Locked SSL ablations (+ optional supervised reference)
+ssl_config: configs/ssl_train.yaml
+seed: 42
+backbone: resnet18          # Day-0 smoke default; use resnet50 for full
+batch_size: 64
+epochs: 2
+subset: 256
+fp16: true
+ablations:
+  - vanilla_dino
+  - sifess_full
+  - no_c_gating
+  - random_frame
+  # - supervised            # optional reference baseline
+output_dir: outputs/ablations
+lambda_eq: 0.5
+lambda_orth: 0.01
+sigma_rho: 1.5
