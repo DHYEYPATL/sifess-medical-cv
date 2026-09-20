@@ -1,0 +1,29 @@
+# Day-0 / default SSL training (DINO + SIFESS)
+seed: 42
+dataset: chestmnist
+image_size: 224
+backbone: resnet50          # smoke overrides to resnet18
+batch_size: 64
+epochs: 100
+lr: 0.0005
+weight_decay: 0.04
+fp16: true
+num_workers: 2
+
+# DINO multi-crop
+n_global: 2
+n_local: 4
+out_dim: 4096
+teacher_momentum: 0.996
+teacher_temp: 0.04
+student_temp: 0.1
+
+# Soft isophote-frame equivariance
+sigma_rho: 1.5
+lambda_eq: 0.5
+lambda_orth: 0.01           # set 0 if SO(2)-on-2D action only
+so2_only: false
+ablation: sifess_full       # vanilla_dino | sifess_full | no_c_gating | random_frame
+
+output_dir: outputs/ssl
+subset: null                # set e.g. 256 for smoke

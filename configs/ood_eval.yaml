@@ -1,0 +1,13 @@
+seed: 42
+dataset: chestmnist
+image_size: 224
+backbone: resnet50
+batch_size: 64
+num_workers: 2
+severity: 0.75
+shifts: [brightness, contrast, gamma]
+checkpoint: null
+probe: null
+output_dir: outputs/ood_eval
+subset: null
+n_classes: 14
