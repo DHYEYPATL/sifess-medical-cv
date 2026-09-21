@@ -1,12 +1,11 @@
-"""DINO-style student–teacher with optional SIFESS soft-equivariance head.
+"""DINO-style student-teacher with optional SIFESS soft-equivariance head.
 
 Single backbone family: ResNet-18 (smoke) / ResNet-50 (default full runs).
 """
 
 from __future__ import annotations
 
-from copy import deepcopy
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, Optional, Sequence, Tuple
 
 import torch
 import torch.nn as nn
@@ -56,7 +55,13 @@ class DINOHead(nn.Module):
 
 
 class DINOSifessModel(nn.Module):
-    """Student–teacher pair + projector + soft equivariance head on bottleneck feats."""
+    """Student-teacher pair + projector + equivariance map on bottleneck feats.
+
+    The student bottleneck packs a dedicated SO(2) plane into the first 2
+    dims with fixed energy fraction plane_alpha. That prevents the vacuous
+    collapse where an invariant encoder dumps all mass into dims >=2 and drives
+    fixed-SO(2) L_eq -> 0 (Day-0 V2 failure mode).
+    """
 
     def __init__(
         self,
@@ -64,9 +69,14 @@ class DINOSifessModel(nn.Module):
         out_dim: int = 4096,
         use_equivariance_head: bool = True,
         momentum: float = 0.996,
+        eq_action: str = "so2_2d",
+        embed_dim: int = 256,
+        plane_alpha: float = 0.1,
     ):
         super().__init__()
         self.momentum = momentum
+        self.eq_action = eq_action
+        self.plane_alpha = float(plane_alpha)
         student_bb, feat_dim = build_backbone(backbone)
         teacher_bb, _ = build_backbone(backbone)
         self.student_backbone = student_bb
@@ -76,18 +86,19 @@ class DINOSifessModel(nn.Module):
         self.student_head = DINOHead(feat_dim, out_dim=out_dim)
         self.teacher_head = DINOHead(feat_dim, out_dim=out_dim)
 
-        # Equivariance acts on L2-normalized bottleneck (pre-prototype) features
         self.student_bottleneck = nn.Sequential(
-            nn.Linear(feat_dim, 256),
+            nn.Linear(feat_dim, embed_dim),
             nn.GELU(),
-            nn.Linear(256, 256),
+            nn.Linear(embed_dim, embed_dim),
         )
         self.use_equivariance_head = use_equivariance_head
         if use_equivariance_head:
-            from sifess.models.equivariance import SoftEquivarianceHead
+            from sifess.models.equivariance import build_rho
 
-            self.rho = SoftEquivarianceHead(256)
+            self.plane_proj = nn.Linear(feat_dim, 2)
+            self.rho = build_rho(eq_action, dim=embed_dim)
         else:
+            self.plane_proj = None
             self.rho = None
 
         self._init_teacher_from_student()
@@ -108,10 +119,22 @@ class DINOSifessModel(nn.Module):
         for ps, pt in zip(self.student_head.parameters(), self.teacher_head.parameters()):
             pt.data.mul_(m).add_(ps.data, alpha=1.0 - m)
 
+    def _pack_embedding(self, feat: torch.Tensor) -> torch.Tensor:
+        """Build unit embedding with fixed energy in the SO(2) plane (first 2 dims)."""
+        h = self.student_bottleneck(feat)
+        rest = F.normalize(h[:, 2:], dim=-1)
+        plane = F.normalize(self.plane_proj(feat), dim=-1)
+        a = self.plane_alpha
+        z = torch.cat([plane * (a ** 0.5), rest * ((1.0 - a) ** 0.5)], dim=-1)
+        return z
+
     def embed_student(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         feat = self.student_backbone(x)
         logits = self.student_head(feat)
-        z = F.normalize(self.student_bottleneck(feat), dim=-1)
+        if self.use_equivariance_head:
+            z = self._pack_embedding(feat)
+        else:
+            z = F.normalize(self.student_bottleneck(feat), dim=-1)
         return logits, z
 
     @torch.no_grad()
