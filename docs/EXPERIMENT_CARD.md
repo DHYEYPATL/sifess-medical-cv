@@ -19,8 +19,9 @@ isophote eigenframe, gated by coherence \(C\) — a foundational training law.
 | Precision | fp16 when CUDA available |
 | Seed | 42 |
 | \(\sigma_\rho\) | 1.5 |
-| \(\lambda_{\mathrm{eq}}\) | 0.5 |
-| \(\lambda_{\mathrm{orth}}\) | 0.01 (or 0 if SO(2)-on-2D) |
+| \(\lambda_{\mathrm{eq}}\) | 1.0 (strong: 2.0) |
+| \(\lambda_{\mathrm{orth}}\) / eq_action | 0 / `so2_2d` |
+| \(\lambda_{\mathrm{plane}}\) | 0.1 |
 
 ### Ablations (SSL)
 
@@ -50,7 +51,7 @@ Macro AUROC at 1% / 10% / 100% labeled. OOD severity 0.75.
 | no_c_gating | 0.6641 | 0.6663 | 0.7006 | — | — | — |
 | random_frame | 0.6573 | 0.6619 | 0.6933 | — | — | — |
 
-Notes: \(L_{\mathrm{eq}}\) logged nonzero on equivariance epoch 1 (~5e-4) then 0 for epochs 2–8.
+Notes: V2 \(L_{\mathrm{eq}}\) ~5e-4 on epoch 1 then 0 for epochs 2–8 (collapse; see METHOD.md). Method fix on main; re-run `kaggle_day0_strong.sh`.
 OOD eval ran for `sifess_full` and `vanilla_dino` only.
 
 ## Full-scale: NIH ChestX-ray14

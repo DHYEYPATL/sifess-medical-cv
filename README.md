@@ -9,11 +9,11 @@ This repository implements a clean **DINO student–teacher** baseline plus a
 coherence-weighted soft equivariance residual \(L_{\mathrm{eq}}\).
 
 \[
-L = L_{\mathrm{DINO}} + \lambda_{\mathrm{eq}} L_{\mathrm{eq}} + \lambda_{\mathrm{orth}} L_{\mathrm{orth}}
+L = L_{\mathrm{DINO}} + \lambda_{\mathrm{eq}} L_{\mathrm{eq}} + \lambda_{\mathrm{plane}} L_{\mathrm{plane}}
 \]
 
-Defaults: \(\lambda_{\mathrm{eq}}=0.5\), \(\lambda_{\mathrm{orth}}=0.01\)
-(set to 0 for pure SO(2)-on-2D action). Structure tensor scale \(\sigma_\rho=1.5\).
+Defaults: \(\lambda_{\mathrm{eq}}=1.0\) (strong runs 2.0), fixed SO(2)-on-2D \(\rho\),
+BYOL-style stopgrad on framed target, packed plane_alpha=0.1. Structure tensor scale \(\sigma_\rho=1.5\).
 
 ## Quickstart
 
@@ -67,9 +67,7 @@ OOD: intensity shifts at severity **0.75** (AUROC and \(\Delta\) vs clean).
 | `sifess_full` | 0.6989 | −0.0458 | −0.0060 | −0.0019 |
 | `vanilla_dino` | 0.7036 | −0.0557 | −0.0076 | −0.0008 |
 
-\(L_{\mathrm{eq}}\) logging works (nonzero on epoch 1 for equivariance ablations:
-~0.0005–0.0006), then collapses to 0.0000 for epochs 2–8 — magnitude still
-needs investigation.
+\(L_{\mathrm{eq}}\) was nonzero on epoch 1 (~5e-4) then collapsed to 0 for epochs 2–8 (FiLM \(\rho\to\mathrm{Id}\) + DINO invariance). **Fixed** in current main: fixed SO(2)-on-2D, stopgrad target, packed plane, \(\lambda_{\mathrm{eq}}=1\)–\(2\). Re-run with `scripts/kaggle_day0_strong.sh`.
 
 > Measured Day-0 numbers, not invented. Longer ResNet-50 / full-epoch tables remain open.
 > Prior Version 1 was a 5-epoch / 4096-subset pass without OOD (see git history).
@@ -86,7 +84,7 @@ sifess/
 configs/        # yaml
 docs/METHOD.md  docs/EXPERIMENT_CARD.md
 notebooks/kaggle_train.ipynb
-scripts/smoke_test.sh  scripts/kaggle_day0.sh
+scripts/smoke_test.sh  scripts/kaggle_day0.sh  scripts/kaggle_day0_strong.sh
 tests/
 ```
 
