@@ -18,11 +18,15 @@ teacher_momentum: 0.996
 teacher_temp: 0.04
 student_temp: 0.1
 
-# Soft isophote-frame equivariance
+# Soft isophote-frame equivariance (post Day-0 V2 collapse fix)
 sigma_rho: 1.5
-lambda_eq: 0.5
-lambda_orth: 0.01           # set 0 if SO(2)-on-2D action only
-so2_only: false
+lambda_eq: 1.0              # raised from 0.5; strong runs use 2.0
+lambda_orth: 0.0            # unused for fixed SO(2)-on-2D
+lambda_plane: 0.1           # keep energy in SO(2) plane
+plane_min: 0.05
+eq_action: so2_2d           # so2_2d (default) | film (legacy, collapses)
+stopgrad_target: true       # BYOL-style: predict framed from source via rho
+so2_only: true
 ablation: sifess_full       # vanilla_dino | sifess_full | no_c_gating | random_frame
 
 output_dir: outputs/ssl

@@ -13,6 +13,8 @@ ablations:
   - random_frame
   # - supervised            # optional reference baseline
 output_dir: outputs/ablations
-lambda_eq: 0.5
-lambda_orth: 0.01
+lambda_eq: 1.0
+lambda_orth: 0.0
+lambda_plane: 0.1
+eq_action: so2_2d
 sigma_rho: 1.5
