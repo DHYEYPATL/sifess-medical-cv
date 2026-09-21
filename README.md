@@ -44,22 +44,35 @@ python -m sifess.engines.linear_probe --checkpoint outputs/ssl/sifess_full/check
 python -m sifess.engines.eval_ood --checkpoint ... --probe outputs/linear_probe/probe.pt --batch-size 32
 ```
 
-## Day-0 linear-probe results (REAL)
+## Day-0 linear-probe + OOD results (REAL)
 
-Source: Kaggle Day-0 notebook / `scripts/kaggle_day0.sh` — **5-epoch ResNet-18
-fast pass** on ChestMNIST (`size=224`). Macro AUROC on the test set at
-1% / 10% / 100% labeled fractions. **OOD intensity eval: TBD** (prior run
-failed on unrecognized `--batch-size`; fixed in this revision).
+Source: Kaggle notebook [`sifess-day0-chestmnist`](https://www.kaggle.com/code/dbpdhyey/sifess-day0-chestmnist) **Version 2**
+(`scripts/kaggle_day0.sh`, ResNet-18, **8 epochs**, subset **8192**, batch **32**, GPU T4×2, ~83 min).
+Macro AUROC on ChestMNIST test at 1% / 10% / 100% labeled fractions.
+OOD: intensity shifts at severity **0.75** (AUROC and \(\Delta\) vs clean).
+
+### Linear probe
 
 | Ablation | 1% | 10% | 100% |
 |----------|-----:|-----:|------:|
-| `vanilla_dino` | 0.6355 | 0.6036 | 0.6538 |
-| `sifess_full` | 0.6597 | 0.6257 | 0.6734 |
-| `no_c_gating` | 0.6546 | 0.6235 | 0.6716 |
-| `random_frame` | 0.6567 | 0.6261 | 0.6724 |
+| `vanilla_dino` | 0.6657 | 0.6711 | 0.7036 |
+| `sifess_full` | 0.6590 | 0.6663 | 0.6989 |
+| `no_c_gating` | 0.6641 | 0.6663 | 0.7006 |
+| `random_frame` | 0.6573 | 0.6619 | 0.6933 |
 
-> These are measured Day-0 numbers, not invented. Longer ResNet-50 / full-epoch
-> and OOD Δ tables remain open.
+### OOD \(\Delta\) vs clean (severity 0.75)
+
+| Ablation | clean AUROC | \(\Delta\) brightness | \(\Delta\) contrast | \(\Delta\) gamma |
+|----------|------------:|---------------------:|-------------------:|-----------------:|
+| `sifess_full` | 0.6989 | −0.0458 | −0.0060 | −0.0019 |
+| `vanilla_dino` | 0.7036 | −0.0557 | −0.0076 | −0.0008 |
+
+\(L_{\mathrm{eq}}\) logging works (nonzero on epoch 1 for equivariance ablations:
+~0.0005–0.0006), then collapses to 0.0000 for epochs 2–8 — magnitude still
+needs investigation.
+
+> Measured Day-0 numbers, not invented. Longer ResNet-50 / full-epoch tables remain open.
+> Prior Version 1 was a 5-epoch / 4096-subset pass without OOD (see git history).
 
 ## Layout
 
