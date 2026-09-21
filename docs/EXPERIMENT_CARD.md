@@ -1,6 +1,6 @@
 # Experiment Card — SIFESS Medical CV
 
-**Status:** scaffolding + Day-0 smoke on ChestMNIST. Full NIH CXR runs: TBD.
+**Status:** scaffolding + Day-0 ChestMNIST (Kaggle V2 with OOD). Full NIH CXR runs: TBD.
 
 ## Claim under test
 
@@ -15,7 +15,7 @@ isophote eigenframe, gated by coherence \(C\) — a foundational training law.
 | Backbone | ResNet-18 (smoke) / ResNet-50 (default full) |
 | SSL | DINO student–teacher |
 | Crops | 2 global + 4 local |
-| Batch | 64 |
+| Batch | 64 (Kaggle Day-0 V2 used 32) |
 | Precision | fp16 when CUDA available |
 | Seed | 42 |
 | \(\sigma_\rho\) | 1.5 |
@@ -39,16 +39,19 @@ Optional reference: `supervised` end-to-end BCE (not part of the SSL quartet).
 
 ## Results (ChestMNIST Day-0)
 
-**Source:** Kaggle Day-0 notebook / `scripts/kaggle_day0.sh` — 5-epoch ResNet-18
-fast pass. Macro AUROC at 1% / 10% / 100% labeled. OOD TBD (CLI `--batch-size`
-was missing; fixed).
+**Source:** [Kaggle `sifess-day0-chestmnist` Version 2](https://www.kaggle.com/code/dbpdhyey/sifess-day0-chestmnist)
+— ResNet-18, **8 epochs**, subset **8192**, batch **32**, GPU T4×2 (~4990 s).
+Macro AUROC at 1% / 10% / 100% labeled. OOD severity 0.75.
 
 | Ablation | 1% | 10% | 100% | OOD Δ (brightness) | OOD Δ (contrast) | OOD Δ (gamma) |
 |----------|-----:|-----:|------:|-------------------:|-----------------:|--------------:|
-| vanilla_dino | 0.6355 | 0.6036 | 0.6538 | TBD | TBD | TBD |
-| sifess_full | 0.6597 | 0.6257 | 0.6734 | TBD | TBD | TBD |
-| no_c_gating | 0.6546 | 0.6235 | 0.6716 | TBD | TBD | TBD |
-| random_frame | 0.6567 | 0.6261 | 0.6724 | TBD | TBD | TBD |
+| vanilla_dino | 0.6657 | 0.6711 | 0.7036 | −0.0557 | −0.0076 | −0.0008 |
+| sifess_full | 0.6590 | 0.6663 | 0.6989 | −0.0458 | −0.0060 | −0.0019 |
+| no_c_gating | 0.6641 | 0.6663 | 0.7006 | — | — | — |
+| random_frame | 0.6573 | 0.6619 | 0.6933 | — | — | — |
+
+Notes: \(L_{\mathrm{eq}}\) logged nonzero on equivariance epoch 1 (~5e-4) then 0 for epochs 2–8.
+OOD eval ran for `sifess_full` and `vanilla_dino` only.
 
 ## Full-scale: NIH ChestX-ray14
 
