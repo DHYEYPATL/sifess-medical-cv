@@ -39,14 +39,16 @@ Optional reference: `supervised` end-to-end BCE (not part of the SSL quartet).
 
 ## Results (ChestMNIST Day-0)
 
-| Ablation | Probe macro AUROC | OOD Δ (brightness) | OOD Δ (contrast) | OOD Δ (gamma) |
-|----------|-------------------:|-------------------:|-----------------:|--------------:|
-| vanilla_dino | TBD | TBD | TBD | TBD |
-| sifess_full | TBD | TBD | TBD | TBD |
-| no_c_gating | TBD | TBD | TBD | TBD |
-| random_frame | TBD | TBD | TBD | TBD |
+**Source:** Kaggle Day-0 notebook / `scripts/kaggle_day0.sh` — 5-epoch ResNet-18
+fast pass. Macro AUROC at 1% / 10% / 100% labeled. OOD TBD (CLI `--batch-size`
+was missing; fixed).
 
-*Do not invent numbers. Fill after `run_ablations` + `linear_probe` + `eval_ood`.*
+| Ablation | 1% | 10% | 100% | OOD Δ (brightness) | OOD Δ (contrast) | OOD Δ (gamma) |
+|----------|-----:|-----:|------:|-------------------:|-----------------:|--------------:|
+| vanilla_dino | 0.6355 | 0.6036 | 0.6538 | TBD | TBD | TBD |
+| sifess_full | 0.6597 | 0.6257 | 0.6734 | TBD | TBD | TBD |
+| no_c_gating | 0.6546 | 0.6235 | 0.6716 | TBD | TBD | TBD |
+| random_frame | 0.6567 | 0.6261 | 0.6724 | TBD | TBD | TBD |
 
 ## Full-scale: NIH ChestX-ray14
 

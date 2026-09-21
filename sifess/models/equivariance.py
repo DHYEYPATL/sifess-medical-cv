@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 from typing import Optional
 
 import torch
@@ -60,12 +59,16 @@ def coherence_weighted_residual(
 ) -> torch.Tensor:
     """L_eq = mean( Cbar * || z_tgt - rho(g) z_src ||^p ).
 
+    Uses the vector Lp-norm (sum over feature dim), not a per-dim mean — the
+    latter diluted the loss by ~D and made logged L_eq print as 0.0000.
+
     cbar: (B,) stopgrad coherence gate. Ablation no_c_gating sets cbar=1.
     """
     diff = z_tgt - z_src_transformed
+    # ||v||_2^p  (p=2 → squared Euclidean); do NOT mean over feature dim
     if p == 2.0:
-        per = (diff ** 2).mean(dim=-1)
+        per = (diff ** 2).sum(dim=-1)
     else:
-        per = diff.abs().pow(p).mean(dim=-1)
+        per = diff.norm(p=2, dim=-1).pow(p)
     w = cbar.reshape(-1).to(dtype=per.dtype)
     return (w * per).mean()

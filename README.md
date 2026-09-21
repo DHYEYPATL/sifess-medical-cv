@@ -15,9 +15,6 @@ L = L_{\mathrm{DINO}} + \lambda_{\mathrm{eq}} L_{\mathrm{eq}} + \lambda_{\mathrm
 Defaults: \(\lambda_{\mathrm{eq}}=0.5\), \(\lambda_{\mathrm{orth}}=0.01\)
 (set to 0 for pure SO(2)-on-2D action). Structure tensor scale \(\sigma_\rho=1.5\).
 
-> **Honesty:** result tables are **TBD**. This repo ships code, configs, tests,
-> and a MedMNIST smoke path — not invented AUROCs.
-
 ## Quickstart
 
 ```bash
@@ -44,8 +41,25 @@ for full runs (`sifess/data/chestxray_loader.py`) but is **not** auto-downloaded
 python -m sifess.engines.train_ssl --ablation sifess_full --backbone resnet18 --epochs 2 --subset 256
 python -m sifess.engines.run_ablations --config configs/ablations.yaml
 python -m sifess.engines.linear_probe --checkpoint outputs/ssl/sifess_full/checkpoint.pt
-python -m sifess.engines.eval_ood --checkpoint ... --probe outputs/linear_probe/probe.pt
+python -m sifess.engines.eval_ood --checkpoint ... --probe outputs/linear_probe/probe.pt --batch-size 32
 ```
+
+## Day-0 linear-probe results (REAL)
+
+Source: Kaggle Day-0 notebook / `scripts/kaggle_day0.sh` — **5-epoch ResNet-18
+fast pass** on ChestMNIST (`size=224`). Macro AUROC on the test set at
+1% / 10% / 100% labeled fractions. **OOD intensity eval: TBD** (prior run
+failed on unrecognized `--batch-size`; fixed in this revision).
+
+| Ablation | 1% | 10% | 100% |
+|----------|-----:|-----:|------:|
+| `vanilla_dino` | 0.6355 | 0.6036 | 0.6538 |
+| `sifess_full` | 0.6597 | 0.6257 | 0.6734 |
+| `no_c_gating` | 0.6546 | 0.6235 | 0.6716 |
+| `random_frame` | 0.6567 | 0.6261 | 0.6724 |
+
+> These are measured Day-0 numbers, not invented. Longer ResNet-50 / full-epoch
+> and OOD Δ tables remain open.
 
 ## Layout
 
@@ -59,7 +73,7 @@ sifess/
 configs/        # yaml
 docs/METHOD.md  docs/EXPERIMENT_CARD.md
 notebooks/kaggle_train.ipynb
-scripts/smoke_test.sh
+scripts/smoke_test.sh  scripts/kaggle_day0.sh
 tests/
 ```
 
@@ -71,7 +85,7 @@ tests/
 - OOD shifts: brightness / contrast / gamma (AUROC + Δ)
 
 See `docs/METHOD.md` for equations and `docs/EXPERIMENT_CARD.md` for the
-locked protocol and TBD tables.
+locked protocol.
 
 ## License
 

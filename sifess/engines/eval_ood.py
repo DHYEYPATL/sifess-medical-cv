@@ -37,6 +37,8 @@ def parse_args(argv=None):
     p.add_argument("--seed", type=int, default=None)
     p.add_argument("--device", type=str, default=None)
     p.add_argument("--backbone", type=str, default=None)
+    p.add_argument("--batch-size", "--batch_size", type=int, default=None,
+                   dest="batch_size", help="Eval dataloader batch size")
     return p.parse_args(argv)
 
 
@@ -71,6 +73,8 @@ def _cfg(args) -> Dict[str, Any]:
         cfg["device"] = args.device
     if args.backbone:
         cfg["backbone"] = args.backbone
+    if args.batch_size is not None:
+        cfg["batch_size"] = args.batch_size
     return cfg
 
 
